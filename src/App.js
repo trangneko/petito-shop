@@ -1,94 +1,131 @@
-import './App.css';
-import { useEffect, useState } from 'react';
-import {app, database} from './firebaseConfig';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import "./App.css";
+import { useEffect, useState } from "react";
+import { database, auth, storage } from "./config/firebaseConfig";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { Auth } from "./components/auth";
+import { ref, uploadBytes } from "firebase/storage";
 
 function App() {
-  const [array, setArray] = useState([]);
-  const [data, setData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  })
-  const auth = getAuth();
-  const dbInstance = collection(database, 'users')
-  const handleInputs = (event) => {
-    let inputs = {[event.target.name] : event.target.value}
+  const [productList, setProductList] = useState([]);
 
-    setData({ ...data,...inputs})
-  }
+  //New product state
+  const [newProductTitle, setNewProductTitle] = useState("");
+  const [newProductPrice, setNewProductPrice] = useState(0);
+  const [isProductType, setIsProductType] = useState(true);
 
-  const handleSubmit = () => {
-    // createUserWithEmailAndPassword(auth, data.email, data.password)
-    // .then((response) => {
-    //   console.log(response.user)
-    // })
-    // .catch((error) => {
-    //   alert(error.message)
-    // }
-    // )
+  //update title state
+  const [updatedTitle, setUpdatedTitle] = useState("");
 
-    addDoc(dbInstance, data)
-    .then(() => {
-      alert('Data sent')
-    })
-    .catch((err) => {
-      alert(err.message)
-    })
-  }
+  //File Upload State
+  const [fileUpload, setFileUpload] = useState(null);
 
-  const getData = async () => {
-    const data = await getDocs(dbInstance);
-    setArray(data.docs.map((item) => {
-      return {
-      ...item.data(), id: item.id
+  const productCollectionRef = collection(database, "products")
 
-      }}
-    ))
+  const onAdd = async () => {
+    try {
+      await addDoc(productCollectionRef, {
+        title: newProductTitle,
+        price: newProductPrice,
+        type: isProductType,
+        userId: auth?.currentUser?.uid,
+      });
+    } catch (err) {
+      console.error(err);
     }
+  };
 
-  const updateData = (id) => {
-    let dataToUpdate = doc(database, 'users', id)
-    updateDoc(dataToUpdate, {
-      name: 'bbb',
-      email: 'aaa',
-    })
-    .then(() => {
-      alert('Data updated')
-      getData()
-    })
-    .catch((err) => {
-      alert(err)
-    })
+  const deleteProduct = async (id) => {
+    const productDoc = doc(database, "products", id);
+    await deleteDoc(productDoc);
+  };
+  const updateProduct = async (id) => {
+    const productDoc = doc(database, "products", id);
+    await updateDoc(productDoc, { title: updatedTitle });
+  };
+
+  const uploadFile = async () => {
+    if (!fileUpload) return;
+    const filesFolderRef = ref(storage, `pjFiles/${fileUpload.name}`);
+    try {
+    await uploadBytes(filesFolderRef, fileUpload);
+    } catch(err) {
+      console.error(err);
+    }
   }
 
   useEffect(() => {
-    getData()
-  }, [])
-  
+  const getProductList = async () => {
+    //Read the data & set product list
+    try {
+      const data = await getDocs(productCollectionRef);
+      const filteredData = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setProductList(filteredData);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+    getProductList();
+  }, [onAdd]);
+
+
   return (
-    <div className="App-header">
-      <input placeholder='Name' name='name' type={'text'} className='input-fields'
-      onChange={event => handleInputs(event)}/>
-      <input placeholder='Email' name='email' type={'email'} className='input-fields'
-      onChange={event => handleInputs(event)}/>
-      <input placeholder='Password' name='password' type={'password'} className='input-fields' 
-      onChange={event => handleInputs(event)}/>
+    <div className="App">
+      <Auth />
 
-      <button onClick={getData}>Submit</button>
+      <div>
+        <input
+          placeholder="Product Title..."
+          onChange={(e) => setNewProductTitle(e.target.value)}
+        />
+        <input
+          placeholder="Price..."
+          type={"number"}
+          onChange={(e) => setNewProductPrice(Number(e.target.value))}
+        />
+        <input
+          type={"checkbox"}
+          checked={isProductType}
+          onChange={(e) => setIsProductType(e.target.checked)}
+        />
+        <label>standee</label>
+        <button onClick={onAdd}>Add</button>
+      </div>
 
-      {array.map((item) => {
-        return (
+      <div>
+        {productList.map((product) => (
           <div>
-            <p>{item.name}</p>
-            <p>{item.email}</p>
-            <p>{item.password}</p>
+            <h1>{product.title}</h1>
+            <p>{product.price}</p>
 
-            <button onClick={() => updateData(item.id)}>Update</button>
+            <button onClick={() => deleteProduct(product.id)}>Delete</button>
+
+            <input
+              placeholder="New title..."
+              onChange={(e) => setUpdatedTitle(e.target.value)}
+            />
+            <button onClick={() => updateProduct(product.id)}>
+              Update Title
+            </button>
           </div>
-        )
-      })}
+        ))}
+      </div>
+
+      <div>
+        <input type={'file'} 
+        onChange={(e) => setFileUpload(e.target.files[0])}/>
+        <button onClick={uploadFile}>Upload File</button>
+      </div>
     </div>
   );
 }
