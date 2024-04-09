@@ -35,6 +35,7 @@ export default function OrdersPage() {
       <div className="flex justify-between items-center gap-4">
         <PageHeader>Đơn hàng</PageHeader>
       </div>
+      {/* @ts-expect-error Async Server Component */}
       <OrdersTable />
     </>
   );

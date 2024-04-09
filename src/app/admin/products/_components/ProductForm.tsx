@@ -59,7 +59,7 @@ export function ProductForm({ product }: { product?: Product | null }) {
 
       <div className="space-y-2">
         <Label htmlFor="description">Ảnh</Label>
-        <Input type={"file"} id="image" name="image" required={product == null} />
+        <Input type={"text"} id="image" name="image" required={product == null} />
         {product != null && <Image src={product.imagePath} height="400" width={"400"} alt={product.name} />}
         {error.image && <div className="text-destructive">{error.image}</div>}
       </div>

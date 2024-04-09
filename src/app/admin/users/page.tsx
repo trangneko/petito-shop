@@ -34,6 +34,7 @@ export default function UsersPage() {
       <div className="flex justify-between items-center gap-4">
         <PageHeader>Khách hàng</PageHeader>
       </div>
+      {/* @ts-expect-error Async Server Component */}
       <UsersTable />
     </>
   );

@@ -8,16 +8,16 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 const fileSchema = z.instanceof(File, { message: "Required" });
-const imageSchema = fileSchema.refine(
-  (file) => file.size === 0 || file.type.startsWith("image/")
-);
+// const imageSchema = fileSchema.refine(
+//   (file) => file.size === 0 || file.type.startsWith("image/")
+// );
 
 const addSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   priceInVnd: z.coerce.number().int().min(1),
   file: fileSchema.refine((file) => file.size > 0, "Required"),
-  image: imageSchema.refine((file) => file.size > 0, "Required"),
+  image: z.string().min(1),
 });
 
 export async function addProduct(prevState: unknown, formData: FormData) {
@@ -33,11 +33,11 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()));
 
   await fs.mkdir("public/products", { recursive: true });
-  const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
-  await fs.writeFile(
-    `public/${imagePath}`,
-    Buffer.from(await data.image.arrayBuffer())
-  );
+  // const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
+  // await fs.writeFile(
+  //   `public/${imagePath}`,
+  //   Buffer.from(await data.image.arrayBuffer())
+  // );
 
   await db.product.create({
     data: {
@@ -46,7 +46,7 @@ export async function addProduct(prevState: unknown, formData: FormData) {
       description: data.description,
       priceInVnd: data.priceInVnd,
       filePath,
-      imagePath,
+      imagePath: data.image,
     },
   });
 
@@ -78,7 +78,7 @@ export async function deleteProduct(id: string) {
 
 const editSchema = addSchema.extend({
   file: fileSchema.optional(),
-  image: imageSchema.optional(),
+  // image: imageSchema.optional(),
 });
 
 export async function updateProduct(
@@ -105,12 +105,12 @@ export async function updateProduct(
     await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()));
   }
 
-  let imagePath = product.imagePath;
-  if (data.image != null && data.image.size > 0) {
-    await fs.unlink(`/products/${product.imagePath}`);
-    imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
-    await fs.writeFile(filePath, Buffer.from(await data.image.arrayBuffer()));
-  };
+  // let imagePath = product.imagePath;
+  // if (data.image != null && data.image.size > 0) {
+  //   await fs.unlink(`/products/${product.imagePath}`);
+  //   imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
+  //   await fs.writeFile(filePath, Buffer.from(await data.image.arrayBuffer()));
+  // };
 
   await db.product.update({
     where: {id},
@@ -119,7 +119,7 @@ export async function updateProduct(
       description: data.description,
       priceInVnd: data.priceInVnd,
       filePath,
-      imagePath,
+      imagePath: data.image,
     },
   });
 
