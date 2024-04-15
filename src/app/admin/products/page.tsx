@@ -12,7 +12,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import db from "@/db/db";
 import { formatCurrency, formatNumber } from "@/lib/formatters";

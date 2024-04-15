@@ -7,3 +7,14 @@ declare module "next-auth" {
         } & DefaultSession["user"]
     }
 }
+
+// Define an interface for your product structure
+interface Product {
+    id: string;
+    name: string;
+    priceInVnd: number;
+    isAvailableForPurchase: boolean;
+    _count: {
+        orders: number;
+    };
+}
