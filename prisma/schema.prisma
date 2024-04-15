@@ -10,31 +10,137 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?
+  phone         String?         @unique
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  Cart          Cart[]
+  Authenticator Authenticator[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Order     Order[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  id                   String  @id @default(auto()) @map("_id") @db.ObjectId
+  credentialID         String  @unique
+  userId               String  @db.ObjectId
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("authenticator")
+}
+
 model Product {
-  id                     String                 @id @default(auto()) @map("_id") @db.ObjectId
+  id                     String     @id @default(auto()) @map("_id") @db.ObjectId
   name                   String
+  priceInJpy             Int?
   priceInVnd             Int
-  filePath               String
+  rootPath               String?
   imagePath              String
   description            String
-  isAvailableForPurchase Boolean                @default(true)
-  createdAt              DateTime               @default(now())
-  updatedAt              DateTime               @updatedAt
+  isAvailableForPurchase Boolean    @default(true)
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
   orders                 Order[]
-  downloadVerification   DownloadVerification[]
+  CartItem               CartItem[]
 
   @@map("Product")
 }
 
-model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+model Cart {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  items     CartItem[]
+  userId    String?    @db.ObjectId
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
-  @@map("User")
+  @@map("Carts")
 }
+
+model CartItem {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+  cartId    String  @db.ObjectId
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@map("CartItems")
+}
+
+// model User {
+//   id         String   @id @default(auto()) @map("_id") @db.ObjectId
+//   name       String
+//   phone      String   @unique
+//   email      String   @unique
+//   address    String
+//   avatarPath String
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+//   orders     Order[]
+
+//   @@map("User")
+// }
 
 model Order {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -50,12 +156,16 @@ model Order {
   @@map("Order")
 }
 
-model DownloadVerification {
+model Post {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  expiresAt DateTime
+  title     String
+  desc      String
+  slug      String   @unique
+  thumbPath String
   createdAt DateTime @default(now())
-  productId String   @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
 
-  @@map("DownloadVerification")
+  userId String @db.ObjectId
+
+  @@map("Post")
 }

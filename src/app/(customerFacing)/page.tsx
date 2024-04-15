@@ -77,6 +77,6 @@ async function ProductSuspense({
 }) {
   const products = await productsFetcher();
   return products.map(product => (
-    <ProductCard key={product.id} {...product} />
+    <ProductCard key={product.id} product={product} />
   ));
 }

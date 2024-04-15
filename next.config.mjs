@@ -3,11 +3,10 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: [
-          "lh3.googleusercontent.com",
-          "lh3.google.com",
-          "static.mercdn.net",
-        ],
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        hostname: "static.mercdn.net",
       },
     ],
   },

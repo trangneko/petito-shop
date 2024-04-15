@@ -11,56 +11,113 @@ import { useFormState, useFormStatus } from "react-dom";
 import { addProduct, updateProduct } from "../../_actions/products";
 
 export function ProductForm({ product }: { product?: Product | null }) {
-  const [error, action] = useFormState(product == null? addProduct : updateProduct.bind(null, product.id), {});
-  const [priceInVnd, setPriceInVnd] = useState<number| undefined>(product?.priceInVnd);
+  const [error, action] = useFormState(
+    product == null ? addProduct : updateProduct.bind(null, product.id),
+    {}
+  );
+  const [priceInVnd, setPriceInVnd] = useState<number | any>(
+    product?.priceInVnd
+  );
+  const [priceInJpy, setPriceInJpy] = useState<number | any>(
+    product?.priceInJpy
+  );
+
+  const isPriceValid = priceInVnd !== undefined || priceInJpy !== undefined;
 
   return (
     <form action={action} className="space-y-8">
       <div className="space-y-2">
         <Label htmlFor="name">Tên</Label>
-        <Input type={"text"} id="name" name="name" required 
-        defaultValue={product?.name || ""}/>
+        <Input
+          type={"text"}
+          id="name"
+          name="name"
+          required
+          defaultValue={product?.name || ""}
+        />
         {error.name && <div className="text-destructive">{error.name}</div>}
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="name">Giá (k đồng)</Label>
-        <Input
-          type={"number"}
-          id="priceInVnd"
-          name="priceInVnd"
-          required
-          value={priceInVnd}
-          onChange={(e) => setPriceInVnd(Number(e.target.value) || undefined)}
-        />
-        <div className="text-muted-foreground">
-          {formatCurrency((priceInVnd || 0) * 1000)}
+
+      <div className="space-y-2 flex justify-between">
+        <div>
+          <Label htmlFor="price">Giá (k đồng)</Label>
+          <Input
+            type={"number"}
+            id="priceInVnd"
+            name="priceInVnd"
+            required={!priceInJpy}
+            value={priceInVnd}
+            onChange={(e) => setPriceInVnd(Number(e.target.value) || null)}
+          />
+          <div className="text-muted-foreground">
+            {formatCurrency((priceInVnd || 0) * 1000)}
+          </div>
+          {error.priceInVnd && (
+            <div className="text-destructive">{error.priceInVnd}</div>
+          )}
         </div>
-        {error.priceInVnd && (
-          <div className="text-destructive">{error.priceInVnd}</div>
-        )}
+        <p>hoặc</p>
+        <div className="m-0">
+          <Label htmlFor="priceInJpy">Giá (yên)</Label>
+          <Input
+            type={"number"}
+            id="priceInJpy"
+            name="priceInJpy"
+            required={!priceInVnd}
+            value={priceInJpy}
+            onChange={(e) => setPriceInJpy(Number(e.target.value) || null)}
+          />
+          <div className="text-muted-foreground">
+            {formatCurrency(priceInJpy || 0, "JPY")}
+          </div>
+          {error.priceInJpy && (
+            <div className="text-destructive">{error.priceInJpy}</div>
+          )}
+        </div>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="description">Mô tả</Label>
-        <Input type={"text"} id="description" name="description" required 
-        defaultValue={product?.description}/>
+        <Input
+          type={"text"}
+          id="description"
+          name="description"
+          defaultValue={product?.description || ""}
+        />
         {error.description && (
           <div className="text-destructive">{error.description}</div>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="file">File</Label>
-        <Input type={"file"} id="file" name="file" required={product == null}/>
-        {product != null && (
-          <div className="text-muted-foreground">{product.filePath}</div>
+        <Label htmlFor="rootPath">Link gốc</Label>
+        <Input
+          type={"text"}
+          id="rootPath"
+          name="rootPath"
+          defaultValue={product?.rootPath || ""}
+        />
+        {error.rootPath && (
+          <div className="text-destructive">{error.rootPath}</div>
         )}
-        {error.file && <div className="text-destructive">{error.file}</div>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Ảnh</Label>
-        <Input type={"text"} id="image" name="image" required={product == null} />
-        {product != null && <Image src={product.imagePath} height="400" width={"400"} alt={product.name} />}
+        <Label htmlFor="image">Ảnh</Label>
+        <Input
+          type={"text"}
+          id="image"
+          name="image"
+          required={product == null}
+        />
+        {product != null && (
+          <Image
+            src={product.imagePath}
+            height="400"
+            width={"400"}
+            alt={product.name}
+          />
+        )}
         {error.image && <div className="text-destructive">{error.image}</div>}
       </div>
       <SubmitButton />
