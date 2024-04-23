@@ -22,7 +22,7 @@ export function ProductForm({ product }: { product?: Product | null }) {
     product?.priceInJpy
   );
 
-  const isPriceValid = priceInVnd !== undefined || priceInJpy !== undefined;
+  const isPriceValid = priceInVnd !== "" || priceInJpy !== "";
 
   return (
     <form action={action} className="space-y-8">
@@ -45,9 +45,9 @@ export function ProductForm({ product }: { product?: Product | null }) {
             type={"number"}
             id="priceInVnd"
             name="priceInVnd"
-            required={!priceInJpy}
+            required={!isPriceValid}
             value={priceInVnd}
-            onChange={(e) => setPriceInVnd(Number(e.target.value) || null)}
+            onChange={(e) => setPriceInVnd(Number(e.target.value) || '')}
           />
           <div className="text-muted-foreground">
             {formatCurrency((priceInVnd || 0) * 1000)}
@@ -63,9 +63,9 @@ export function ProductForm({ product }: { product?: Product | null }) {
             type={"number"}
             id="priceInJpy"
             name="priceInJpy"
-            required={!priceInVnd}
+            required={!isPriceValid}
             value={priceInJpy}
-            onChange={(e) => setPriceInJpy(Number(e.target.value) || null)}
+            onChange={(e) => setPriceInJpy(Number(e.target.value) || '')}
           />
           <div className="text-muted-foreground">
             {formatCurrency(priceInJpy || 0, "JPY")}

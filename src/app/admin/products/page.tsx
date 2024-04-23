@@ -43,6 +43,7 @@ async function ProductsTable() {
   const products = await db.product.findMany({
     select: {
       id: true,
+      shortId: true,
       name: true,
       priceInVnd: true,
       isAvailableForPurchase: true,
@@ -95,10 +96,7 @@ async function ProductsTable() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
-                    <a download href={`/admin/products/${product.id}/download`}>Tải xuống</a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/admin/products/${product.id}/edit`}>Sửa</Link>
+                    <Link href={`/admin/products/${product.shortId}/edit`}>Sửa</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <ActiveToggleDropdownItem id={product.id} isAvailableForPurchase={product.isAvailableForPurchase} />

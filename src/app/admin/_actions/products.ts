@@ -4,13 +4,15 @@ import db from "@/db/db";
 import { z } from "zod";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { generateProductId } from "@/lib/utils";
 
 const addSchema = z.object({
+  shortId: z.string().optional(),
   name: z.string().min(1).max(50),
   description: z.string().min(1),
   priceInJpy: z.coerce.number().int(),
   priceInVnd: z.coerce.number().int(),
-  rootPath: z.string().min(1),
+  rootPath: z.string(),
   image: z.string().min(1),
 });
 
@@ -29,15 +31,20 @@ export async function fetchProducts() {
 }
 
 export async function addProduct(prevState: unknown, formData: FormData) {
-  const result = addSchema.safeParse(Object.fromEntries(formData.entries()));
+  const customId = generateProductId();
+  const entries = Object.fromEntries(formData.entries());
+  entries.shortId = customId;
+
+  const result = addSchema.safeParse(entries);
   if (result.success === false) {
     return result.error.formErrors.fieldErrors;
   }
 
   const data = result.data;
 
-  await db.product.create({
+  const newProduct = await db.product.create({
     data: {
+      shortId: customId,
       isAvailableForPurchase: false,
       name: data.name,
       description: data.description,
@@ -47,9 +54,10 @@ export async function addProduct(prevState: unknown, formData: FormData) {
       imagePath: data.image,
     },
   });
+  console.log("Product created successfully", newProduct);
 
-  revalidatePath("/")
-  revalidatePath("/products")
+  revalidatePath("/");
+  revalidatePath("/products");
   redirect("/admin/products");
 }
 
@@ -59,16 +67,16 @@ export async function toggleProductAvailability(
 ) {
   await db.product.update({ where: { id }, data: { isAvailableForPurchase } });
 
-  revalidatePath("/")
-  revalidatePath("/products")
+  revalidatePath("/");
+  revalidatePath("/products");
 }
 
 export async function deleteProduct(id: string) {
   const product = await db.product.delete({ where: { id } });
   if (product == null) return notFound();
 
-  revalidatePath("/")
-  revalidatePath("/products")
+  revalidatePath("/");
+  revalidatePath("/products");
 }
 
 export async function updateProduct(
@@ -89,7 +97,7 @@ export async function updateProduct(
   if (product == null) return notFound();
 
   await db.product.update({
-    where: {id},
+    where: { id },
     data: {
       name: data.name,
       description: data.description,
@@ -100,7 +108,7 @@ export async function updateProduct(
     },
   });
 
-  revalidatePath("/")
-  revalidatePath("/products")
+  revalidatePath("/");
+  revalidatePath("/products");
   redirect("/admin/products");
 }

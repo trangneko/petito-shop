@@ -23,6 +23,7 @@ import { useState } from "react";
 interface ProductCardProps {
   product: {
     id: string;
+    shortId: string | null;
     name: string;
     priceInVnd: number;
     description: string;
@@ -62,7 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter>
         <Button asChild size={"lg"} className="w-full">
-          <Link href={`/products/${product.id}`}>Xem thêm</Link>
+          <Link href={`/products/${product.shortId ?? product.id}`}>Xem thêm</Link>
         </Button>
       </CardFooter>
     </Card>

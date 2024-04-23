@@ -2,14 +2,17 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import "./globalicon.css";
+// import "./globalicon.css";
 import Footer from "@/components/Footer";
 import SessionProvider from "./SessionProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Petito Shop",
+  title: {
+    default: 'Petito Shop',
+    template: "%s | Petito Shop"
+  },
   description:
     "Petito Shop chuyên mua hộ hàng Nhật, đi pick-up bốc hàng quanh Tokyo ngoài ra có nhận order Taobao nka",
 };
@@ -27,9 +30,10 @@ export default function RootLayout({
           inter.variable
         )}
       >
+        <div className="flex-grow" style={{ minHeight: 'calc(100vh - var(--navbar-height) - var(--footer-height))' }}>
         <SessionProvider>
           {children}
-        </SessionProvider>
+        </SessionProvider></div>
       <Footer />
       </body>
     </html>

@@ -10,21 +10,29 @@ import { incrementProductQuantity } from "./actions";
 interface ProductPageProps {
   params: {
     id: string;
+    shortId: string;
   };
 }
 
 const getProduct = cache(async (id: string) => {
-  const product = await db.product.findUnique({ where: { id } });
+  let product;
+  try {
+    product = await db.product.findUnique({ where: { id } });
+  } catch(error) {
+    // If the first query fails, attempt to query by shortId
+    product = await db.product.findFirst({ where: { shortId: id } });
+  }
   if (!product) notFound();
   return product;
 });
+
 
 export async function generateMetadata({
   params: { id },
 }: ProductPageProps): Promise<Metadata> {
   const product = await getProduct(id);
   return {
-    title: product.name + " | Petito Shop",
+    title: product.name,
     description: product.description,
     openGraph: {
       images: [{ url: product.imagePath }],
@@ -49,7 +57,7 @@ export default async function ProductPage({
       />
 
       <div>
-        <h1 className="text-5xl font-bold">{product.name}</h1>
+        <h1 className="h1">{product.name}</h1>
         <p className="text-4xl text-red-600">
           {formatCurrency(product.priceInVnd*1000) }
         </p>
