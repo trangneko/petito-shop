@@ -12,49 +12,82 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { updateUserQuick } from "../../user/actions";
 
 const message = "Mục này không được để trống.";
 const phoneMess = "Số điện thoại không đúng định dạng";
 
 const AddressFormSchema = z.object({
-  buyerName: z
+  id: z.string().min(1),
+  name: z
     .string()
     .min(1, { message: message })
     .max(30, { message: "Tên quá dài" }),
-  buyerEmail: z
+  email: z
     .string()
     .email({ message: "Email không hợp lệ" })
     .max(30, { message: "Email quá dài" }),
-  buyerPhone: z
-    .string()
-    .regex(/^[0-9+]{10,11}$/, { message: phoneMess }),
-  buyerAddress: z
-    .string()
-    .min(2, { message: message })
-    .max(80, { message: "Địa chỉ quá dài" }),
+  phone: z.string().regex(/^[0-9+]{10,11}$/, { message: phoneMess }),
+  city: z.string().min(1, "Vui lòng chọn thành phố"),
+  address: z.string().min(1, message).max(80, "Địa chỉ quá dài"),
 });
 
-export default function InputForm() {
+interface AddressFormProps {
+  initialData?: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    city?: string | null;
+    address?: string | null;
+  };
+}
+
+export default function AddressForm({ initialData }: AddressFormProps) {
+  const defaultValues = {
+    id: initialData?.id,
+    name: initialData?.name || "",
+    email: initialData?.email || "",
+    phone: initialData?.phone || "",
+    city: initialData?.city || "",
+    address: initialData?.address || "",
+  };
+
   const form = useForm<z.infer<typeof AddressFormSchema>>({
     resolver: zodResolver(AddressFormSchema),
-    defaultValues: {
-      buyerName: "",
-      buyerEmail: "",
-      buyerPhone: "",
-      buyerAddress: "",
-    },
+    defaultValues: defaultValues,
   });
 
   function onSubmit(data: z.infer<typeof AddressFormSchema>) {
-    console.log("Form Data:", data);
+    updateUserQuick(data.id, data)
+      .then(() => {
+        console.log("Update successful");
+      })
+      .catch((error) => {
+        console.error("Update failed", error);
+      });
   }
+
+  const city = form.watch("city");
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+      <form
+        onSubmit={form.handleSubmit(
+          (data) => onSubmit(data),
+          (errors) => console.log(errors) // Log out any validation errors
+        )}
+        className="w-2/3 space-y-6"
+      >
         <FormField
           control={form.control}
-          name="buyerName"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tên người nhận</FormLabel>
@@ -67,12 +100,16 @@ export default function InputForm() {
         />
         <FormField
           control={form.control}
-          name="buyerEmail"
+          name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type={"email"} placeholder="petitoshop@gmail.com" {...field} />
+                <Input
+                  type={"email"}
+                  placeholder="petitoshop@gmail.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -80,7 +117,7 @@ export default function InputForm() {
         />
         <FormField
           control={form.control}
-          name="buyerPhone"
+          name="phone"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Số điện thoại</FormLabel>
@@ -91,14 +128,45 @@ export default function InputForm() {
             </FormItem>
           )}
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>{city || "Chọn thành phố"}</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onSelect={() => form.setValue("city", "Hà Nội")}>
+              Hà Nội
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => form.setValue("city", "Hồ Chí Minh")}
+            >
+              TP. Hồ Chí Minh
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => form.setValue("city", "Đà Nẵng")}>
+              Đà Nẵng
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <FormField
           control={form.control}
-          name="buyerAddress"
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input type={"hidden"} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="address"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Địa chỉ</FormLabel>
               <FormControl>
-                <Input type={"text"}
+                <Input
+                  type={"text"}
                   placeholder="Số xx đường Láng, phường Láng Thượng, quận Đống Đa, HN"
                   {...field}
                 />
@@ -107,77 +175,8 @@ export default function InputForm() {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit">Cập nhật</Button>
       </form>
     </Form>
   );
 }
-
-// const AddressForm: React.FC = () => {
-//   const [formValues, setFormValues] = useState({
-//     buyerName: "",
-//     buyerEmail: "",
-//     buyerPhone: "",
-//     buyerAddress: "",
-//   });
-
-//   const [formErrors, setFormErrors] = useState({});
-
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault();
-//     const result = AddressFormSchema.safeParse(formValues);
-//     if (result.success) {
-//       console.log("Form Data:", result.data); // Process form submission here
-//     } else {
-//       setFormErrors(result.error.flatten().fieldErrors);
-//     }
-//   };
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-//     setFormValues((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className="space-y-4">
-//         <Label htmlFor="name">Tên</Label>
-//       <Input
-//         name="buyerName"
-//         placeholder="Enter your name"
-//         value={formValues.buyerName}
-//         onChange={handleChange}
-
-//       />
-//       {formErrors.buyerName && <div className="text-destructive">{error.name}</div>}
-//       <Label htmlFor="name">Email</Label>
-//       <Input
-//         type="email"
-//         name="buyerEmail"
-//         placeholder="Enter your email"
-//         value={formValues.buyerEmail}
-//         onChange={handleChange}
-//       />
-//         error={formErrors.buyerEmail?.[0]}
-//         <Label htmlFor="name">Số điện thoại</Label>
-//       <Input
-//         type="tel"
-//         name="buyerPhone"
-//         placeholder="Enter your phone number"
-//         value={formValues.buyerPhone}
-//         onChange={handleChange}
-//         error={formErrors.buyerPhone?.[0]}
-//       />
-//        <Label htmlFor="name">Địa chỉ</Label>
-//       <Input
-//         name="buyerAddress"
-//         placeholder="Enter your address"
-//         value={formValues.buyerAddress}
-//         onChange={handleChange}
-//         error={formErrors.buyerAddress?.[0]}
-//       />
-//       <Button type="submit">Submit</Button>
-//     </form>
-//   );
-// };
-
-// export default AddressForm;

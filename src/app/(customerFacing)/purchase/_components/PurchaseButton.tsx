@@ -3,14 +3,30 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { handleCreatePaymentLink } from "../actions";
 import { Button } from "@/components/ui/button";
+import { ShoppingCart } from "@/db/cart";
+import { BuyerDetails } from "next-auth";
 
-export default function PurchaseButton() {
+interface PurchaseButtonProps {
+  cart: ShoppingCart;
+  buyerDetails: BuyerDetails | null;
+}
+
+export default function PurchaseButton({ cart, buyerDetails }: PurchaseButtonProps) {
+  console.log("buyer details", buyerDetails);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  if (!buyerDetails ||
+    (['buyerAddress', 'buyerEmail', 'buyerName', 'buyerPhone'] as (keyof BuyerDetails)[])
+      .some(key => !buyerDetails[key]?.length)
+  ) {
+    return <div>Vui lòng bổ sung thông tin nhận hàng (có thể sửa sau).</div>;
+  }
+  
+
   const createAndNavigate = async () => {
     setLoading(true);
-    const url = await handleCreatePaymentLink();
+    const url = await handleCreatePaymentLink({ cart, ...buyerDetails });
     setLoading(false);
     if (url) {
       router.push(url); // Use the useRouter hook to navigate

@@ -42,7 +42,7 @@ export default function ShoppingCartButton({ cart }: ShoppingCartButtonProps) {
           <CardHeader>
             <CardTitle>{cart?.size || 0} sản phẩm</CardTitle>
             <CardDescription>
-              Thành tiền: {formatCurrency((cart?.subtotal || 0) * 1000)}
+              Thành tiền: {formatCurrency(cart?.subtotal || 0)}
             </CardDescription>
           </CardHeader>
           <CardFooter>

@@ -7,6 +7,7 @@ import { getCart } from "@/db/cart";
 import UserMenuButton from "@/components/UserMenuButton";
 import { auth } from "@/auth";
 import { SearchIcon } from "lucide-react";
+import Image from "next/image";
 // import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // import  getServerSession from "next-auth";
 
@@ -26,7 +27,7 @@ export default async function Navbar() {
 
   return (
     <Nav>
-      <div>Logo</div>
+      <Image src={"/logo.png"} alt={"Petito Logo"} width={100} height={50}/>
 
       <div>
         <NavLink href="/">Trang chủ</NavLink>

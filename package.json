@@ -24,7 +24,6 @@
     "lucide-react": "^0.365.0",
     "next": "^14.2.1",
     "next-auth": "^5.0.0-beta.15",
-    "payos-checkout": "^1.0.7",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.51.3",
@@ -32,8 +31,6 @@
     "sha256": "^0.2.0",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
-    "vietqr": "^1.1.9",
-    "vnpay": "^1.1.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {

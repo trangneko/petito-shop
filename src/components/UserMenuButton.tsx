@@ -1,10 +1,8 @@
 "use client";
 
 import { handleSignOut } from "@/app/api/auth/signout";
-import {signIn, signOut}  from "@/auth";
 import { UserIcon } from "lucide-react";
 import { Session } from "next-auth";
-import { redirect } from "next/dist/server/api-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./ui/button";
@@ -14,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-// import { signIn, signOut } from "next-auth/react";
 
 interface UserMenuButtonProps {
   session: Session | null;

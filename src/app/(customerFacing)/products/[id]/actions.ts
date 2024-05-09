@@ -2,7 +2,6 @@
 
 import { createCart, getCart } from "@/db/cart";
 import db from "@/db/db";
-import { AlignStartVerticalIcon } from "lucide-react";
 import { revalidatePath } from "next/cache";
 
 export async function incrementProductQuantity(productId: string) {

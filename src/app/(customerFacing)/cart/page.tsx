@@ -27,7 +27,7 @@ export default async function CartPage() {
       ) : (
         <div className="flex flex-col items-end">
           <p className="font-bold">
-            Tổng cộng: {formatCurrency(cart?.subtotal! * 1000 || 0)}
+            Tổng cộng: {formatCurrency(cart?.subtotal! || 0)}
           </p>
           <p className="mb-3">
             Lưu ý: số tiền chưa bao gồm phí ship nội địa VN (nếu có), phí cân

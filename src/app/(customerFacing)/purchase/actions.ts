@@ -1,36 +1,53 @@
+"use server";
+import { ShoppingCart } from "@/db/cart";
 import { env } from "@/lib/env";
 import PayOS from "@payos/node";
 
-const clientID = "0d26a8a4-55ad-4972-a7cf-7663fb358ced";
-const apiKey = "8909f39b-a9b1-4ccc-ad2e-265dc4ba52b7";
-const checksumKey = "b81e014048d0fc5986442aabc9aa9cf1ab0e7f9192bd8579c25cc78c08028088";
+const clientID = env.PAYOS_CLIENT_ID;
+const apiKey = env.PAYOS_API_KEY;
+const checksumKey = env.PAYOS_CHECKSUM_KEY;
+const host = env.NEXTAUTH_URL;
 
-const payOS = new PayOS(
-  clientID,
-  apiKey,
-  checksumKey
-);
+const payOS = new PayOS(clientID, apiKey, checksumKey);
 
-export const handleCreatePaymentLink = async () => {
+interface PaymentLinkData {
+  cart: ShoppingCart;
+  buyerName: string | undefined;
+  buyerEmail: string | undefined;
+  buyerPhone: string | undefined;
+  buyerAddress: string;
+}
+
+export const handleCreatePaymentLink = async ({
+  cart,
+  buyerName,
+  buyerEmail,
+  buyerPhone,
+  buyerAddress,
+}: PaymentLinkData) => {
+  const items = cart.items.map((item) => ({
+    shortId: item.product.shortId,
+    name: item.product.name,
+    quantity: item.quantity,
+    price: item.product.priceInVnd*1000,
+  }));
+
+  const totalAmount = cart.subtotal;
+
   const body = {
     orderCode: Number(String(Date.now()).slice(-6)),
-    amount: 12000,
-    description: "Thanh toan don hang",
-    items: [
-      {
-        name: "Mi tom hao hao",
-        quantity: 1,
-        price: 2000,
-      },
-      {
-        name: "Miku nend",
-        quantity: 1,
-        price: 10000,
-      },
-    ],
-    cancelUrl: "http://localhost:3000/purchase/cancel",
-    returnUrl: "http://localhost:3000/purchase/success",
+    amount: totalAmount,
+    description: `${buyerName} Thanh toan`,
+    buyerName,
+    buyerEmail,
+    buyerPhone,
+    buyerAddress,
+    items: items,
+    cancelUrl: `${host}/purchase/cancel`,
+    returnUrl: `${host}/purchase/success`,
   };
+
+  console.log("body sent: ", body);
 
   try {
     const paymentLinkRes = await payOS.createPaymentLink(body);
