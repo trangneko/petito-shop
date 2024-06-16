@@ -3,9 +3,9 @@ import { ShoppingCart } from "@/db/cart";
 import { env } from "@/lib/env";
 import PayOS from "@payos/node";
 
-const clientID = env.PAYOS_CLIENT_ID;
-const apiKey = env.PAYOS_API_KEY;
-const checksumKey = env.PAYOS_CHECKSUM_KEY;
+const clientID = env.NEXT_PUBLIC_PAYOS_CLIENT_ID;
+const apiKey = env.NEXT_PUBLIC_PAYOS_API_KEY;
+const checksumKey = env.NEXT_PUBLIC_PAYOS_CHECKSUM_KEY;
 const host = env.NEXTAUTH_URL;
 
 const payOS = new PayOS(clientID, apiKey, checksumKey);

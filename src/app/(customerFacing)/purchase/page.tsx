@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { getCart, ShoppingCart } from "@/db/cart";
 import { formatCurrency } from "@/lib/formatters";
 import { User } from "@prisma/client";
+import { cookies } from "next/headers";
 import Link from "next/link";
-import AddressForm from "./_components/AddressForm";
+import AddressContainer from "./_components/AddressContainer";
 import CartItem from "./_components/CartItem";
 import PurchaseButton from "./_components/PurchaseButton";
 
@@ -17,32 +18,29 @@ function prepareBuyerDetails(buyer: User) {
     return null;
   }
 
-  const formatAddressPart = (part: string | null) => part ? part : '';
+  const formatAddressPart = (part: string | null) => (part ? part : "");
 
   // Safely construct the address to avoid "null, null" or similar outcomes
-  const addressParts = [buyer.address, buyer.city].map(formatAddressPart).filter(part => part !== '');
-  const formattedAddress = addressParts.join(', ');
+  const addressParts = [buyer.address, buyer.city]
+    .map(formatAddressPart)
+    .filter((part) => part !== "");
+  const formattedAddress = addressParts.join(", ");
 
-  const buyerDetails = {
-    buyerName: buyer.name ?? '',
-    buyerEmail: buyer.email ?? '',
-    buyerPhone: buyer.phone ?? '',
-    buyerAddress: formattedAddress || '',  // Use the formatted address or default to an empty string
+  return {
+    buyerName: buyer.name ?? "",
+    buyerEmail: buyer.email ?? "",
+    buyerPhone: buyer.phone ?? "",
+    buyerAddress: formattedAddress || "",
   };
-
-  return buyerDetails;
 }
 
-async function PurchasePage() {
+export default async function PurchasePage() {
   const session = await auth();
   const user = session?.user;
+  const query = new URLSearchParams(cookies().get("currentURL")?.value);
 
   if (user != null) {
-    if (user && user.name && user.email && user.phone && user.address) {
-      user.isGuest = false;
-    } else {
-      user.isGuest = true;
-    }
+    user.isGuest = !(user.name && user.email && user.phone && user.address);
     const buyerDetails = prepareBuyerDetails(user);
     const cart: ShoppingCart | null = await getCart();
 
@@ -69,7 +67,7 @@ async function PurchasePage() {
             )}
           </div>
 
-          {user.isGuest ? <AddressForm initialData={user} /> : null}
+            <AddressContainer initialData={user} />
 
         </div>
         <div className="flex justify-end my-6">
@@ -88,5 +86,3 @@ async function PurchasePage() {
     );
   }
 }
-
-export default PurchasePage;
