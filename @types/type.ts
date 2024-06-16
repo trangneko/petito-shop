@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User, Order, OrderItem, Product } from "@prisma/client";
 import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
@@ -19,13 +19,8 @@ declare module "next-auth" {
       }
 }
 
-// Define an interface for your product structure
-interface Product {
-    id: string;
-    name: string;
-    priceInVnd: number;
-    isAvailableForPurchase: boolean;
-    _count: {
-        orders: number;
-    };
-}
+export type OrderWithItems = Order & {
+    orderItems: (OrderItem & {
+      product: Product;
+    })[];
+  };

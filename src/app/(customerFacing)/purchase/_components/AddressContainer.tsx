@@ -14,8 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { updateUserQuick } from "../../user/actions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/Label";
 import { useState } from "react";
+import { Label } from "@radix-ui/react-label";
 
 const message = "Mục này không được để trống.";
 const phoneMess = "Số điện thoại không đúng định dạng";
@@ -206,23 +206,23 @@ function AddressConfirm({
       </Button>
       <div>
         <Label>Tên người nhận</Label>
-        <div>{initialData!.name}</div>
+        <p>{initialData!.name}</p>
       </div>
       <div>
         <Label>Email</Label>
-        <div>{initialData!.email}</div>
+        <p>{initialData!.email}</p>
       </div>
       <div>
         <Label>Số điện thoại</Label>
-        <div>{initialData!.phone}</div>
+        <p>{initialData!.phone}</p>
       </div>
       <div>
         <Label>Thành phố</Label>
-        <div>{initialData!.city || "Không có thành phố"}</div>
+        <p>{initialData!.city || "Không có thành phố"}</p>
       </div>
       <div>
         <Label>Địa chỉ</Label>
-        <div>{initialData!.address}</div>
+        <p>{initialData!.address}</p>
       </div>
     </div>
   );
