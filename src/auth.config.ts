@@ -4,6 +4,7 @@ import google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { LoginSchema } from "./app/auth/schema";
 import db from "./db/db";
+import { env } from "./lib/env";
 
 export default {
   providers: [
@@ -31,8 +32,8 @@ export default {
       },
     }),
     google({
-      clientId: process.env.AUTH_GOOGLE_CLIENT_ID,
-      clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET,
+      clientId: env.AUTH_GOOGLE_CLIENT_ID,
+      clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
       // authorization: {
       //   url: "https://accounts.google.com/o/oauth2/auth",
       //   params: {

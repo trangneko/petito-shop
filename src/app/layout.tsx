@@ -5,6 +5,7 @@ import "./globals.css";
 // import "./globalicon.css";
 import Footer from "@/components/Footer";
 import SessionProvider from "./SessionProvider";
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         <div className="flex-grow" style={{ minHeight: 'calc(100vh - var(--navbar-height) - var(--footer-height))' }}>
         <SessionProvider>
           {children}
+          <Analytics />
         </SessionProvider></div>
       <Footer />
       </body>
