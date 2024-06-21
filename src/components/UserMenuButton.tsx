@@ -5,6 +5,7 @@ import { UserIcon } from "lucide-react";
 import { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
+import { LoginButton } from "./LoginButton";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -38,7 +39,7 @@ export default function UserMenuButton({ session }: UserMenuButtonProps) {
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem tabIndex={0} className="s-30 mt-3 w-52 shadow">
+        <DropdownMenuItem tabIndex={0} className="s-30 mt-3 w-52">
           {user ? (
             <form
             action={async () => {
@@ -50,9 +51,11 @@ export default function UserMenuButton({ session }: UserMenuButtonProps) {
             </Button>
             </form>
           ) : (
-            <Link href="/api/auth/signin">
-            <Button>Đăng nhập</Button>
-            </Link>
+            <LoginButton>
+            <Button size="lg" variant="default">
+              Đăng nhập
+            </Button>
+          </LoginButton>
           )}
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { getCart, ShoppingCart } from "@/db/cart";
 import { formatCurrency } from "@/lib/formatters";
 import { User } from "@prisma/client";
-import { cookies } from "next/headers";
 import Link from "next/link";
 import AddressContainer from "./_components/AddressContainer";
 import CartItem from "./_components/CartItem";
@@ -34,15 +33,18 @@ function prepareBuyerDetails(buyer: User) {
   };
 }
 
+function isUserWithDetails(user: any): user is User {
+  return typeof user === 'object' && user !== null && 'email' in user && 'id' in user;
+}
+
 export default async function PurchasePage() {
   const session = await auth();
   const user = session?.user;
-  const query = new URLSearchParams(cookies().get("currentURL")?.value);
 
-  if (user != null) {
+  if (isUserWithDetails(user)) {
     user.isGuest = !(user.name && user.email && user.phone && user.address);
     const buyerDetails = prepareBuyerDetails(user);
-    const cart: ShoppingCart | null = await getCart();
+    const cart = await getCart();
 
     return (
       <div className="container mx-auto">

@@ -8,7 +8,6 @@ import { revalidatePath } from "next/cache";
 const phoneMess = "Số điện thoại không đúng định dạng";
 
 const addSchema = z.object({
-  username: z.string().optional(),
   name: z.string().min(1).max(50),
   email: z.string().email(),
   phone: z.string().regex(/^[0-9+]{10,11}$/, { message: phoneMess }),
@@ -31,12 +30,11 @@ export async function newUser(prevState: unknown, formData: FormData) {
 
   const newUser = await db.user.create({
     data: {
-      username: data.username,
       name: data.name,
       email: data.email,
       emailVerified: null,
       phone: data.phone,
-      image: data.image,
+      image: data.image ?? null,
       city: data.city,
       address: data.address,
     },
@@ -67,7 +65,6 @@ export async function updateUser(
   await db.user.update({
     where: { id },
     data: {
-      username: data.username,
       name: data.name,
       email: data.email,
       phone: data.phone,

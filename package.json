@@ -1,6 +1,6 @@
 {
   "name": "petito-shop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -20,6 +20,7 @@
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
     "await": "^0.2.6",
+    "bcryptjs": "^2.4.3",
     "body-parser": "~1.17.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -36,6 +37,7 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/dateformat": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",

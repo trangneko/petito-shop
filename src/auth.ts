@@ -1,8 +1,10 @@
+import NextAuth, { Session } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import { mergeAnonCartIntoUserCart } from "./db/cart";
+import type { Provider } from "next-auth/providers";
+
+import authConfig from "@/auth.config";
 import db from "./db/db";
+import { mergeAnonCartIntoUserCart } from "./db/cart";
 
 export const {
   handlers: { GET, POST },
@@ -11,43 +13,34 @@ export const {
   signOut,
 } = NextAuth({
   adapter: PrismaAdapter(db),
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+  session: { strategy: "jwt" },
   callbacks: {
-    // session({ session, user }) {
-    //   if (user && session?.user) {
-    //     session.user.id = user.id;
-    //   }
-    //   return session;
-    // },
-
     async session({ session, token }) {
-      if (token && token.sub) {
-        const user = await db.user.findUnique({
-          where: { id: token.sub },
-        });
+      try {
+        if (token.sub) {
+          const userData = await db.user.findUnique({
+            where: { id: token.sub },
+          });
 
-        if (user) {
-          // Ensure the user object conforms to the expected session user structure
-          session.user = {
-            ...session.user, // Spread existing session user properties
-            ...user, // Spread full user details from the database
-            id: user.id, // Ensure the ID is set correctly
-            name: user.name || session.user.name, // Default to existing session name if DB name is not set
-            email: user.email || session.user.email,
-            image: user.image || session.user.image,
-            phone: user.phone || session.user.phone,
-            city: user.city || session.user.city,
-            address: user.address || session.user.address,
-          };
+          if (userData) {
+            session.user = {
+              ...(session.user || {}),
+              ...userData,
+              isGuest: !(userData.name && userData.email && userData.phone && userData.address),
+            } as any; // Use any to prevent type conflicts, but handle it with care
+          }
         }
+        return session;
+      } catch (error) {
+        console.error("Error in session callback", error);
+        return session;
       }
-
-      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
     },
   },
   events: {
@@ -59,4 +52,17 @@ export const {
       }
     },
   },
+  // pages: {
+  //   signIn: '/auth/login',
+  // },
+  ...authConfig,
+});
+
+export const providerMap = (authConfig.providers as Provider[]).map((provider) => {
+  if (typeof provider === "function") {
+    const providerData = provider();
+    return { id: providerData.id, name: providerData.name };
+  } else {
+    return { id: provider.id, name: provider.name };
+  }
 });
